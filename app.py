@@ -58,69 +58,6 @@ async def add_channel():
             # Add logviews, residuals, and other necessary fields for raw data
             updated_df, problematic_channel = get_residual(df)
 
-            thumbnail_info_data = {
-            "channel_data_df_jsonify": updated_df.to_dict(orient='records')  # Example format
-           }
-            #print(updated_df)
-            #print(thumbnail_info_datsa)
-
-        # Send a POST request to the external endpoint
-            #try:
-            # Configure retries
-            max_retries = 3  # Maximum number of retries
-            backoff_factor = 0.5  # Time factor for determining how long to wait between retries
-            retry_statuses = [408, 429, 500, 502, 503, 504]  # Status codes to retry on
-
-            #retries = httpx.Retry(
-            #    max_retries=max_retries,
-            #    backoff_factor=backoff_factor,
-            #    status_codes=retry_statuses
-            #)
-
-            timeout_seconds = 30.0 
-            async with httpx.AsyncClient(timeout=httpx.Timeout(timeout_seconds)) as client:
-                thumbnail_info_response = await client.post(
-                    'https://clickwise-thumbnail-model-284d7599d36e.herokuapp.com/get_thumbnail_info',
-                    json=thumbnail_info_data
-            )
-            print('************************')    
-            print(thumbnail_info_response)
-            print('************************')  
-                
-            #if thumbnail_info_response.status_code == 200:
-               # response_data = thumbnail_info_response.json()  # Parse the outer JSON
-                #print('///////////////////////////')
-                #print(type(response_data))
-                #print('///////////////////////////')
-                #thumbnail_response_json_str = response_data.get('thumbnail_df_json', None) 
-                #print('///////////////////////////')
-                #print(thumbnail_response_json_str)
-                #print('///////////////////////////')
-                #if response_data is not None:  #TODO: why nested json?
-                    # Parse the nested JSON string into a Python object
-                  #  thumbnail_response_json = json.loads(response_data)
-                    #print('//////////////////')
-                    #print(type(thumbnail_response_json))
-    
-                    # Now, thumbnail_response_json should be in a proper format to create a DataFrame
-                  #  thumbnail_info_df = pd.DataFrame.from_dict(thumbnail_response_json) 
-
-                   # print('#########')
-                    #print(thumbnail_response_json )
-            #else:
-              #  print("'thumbnail_df_json' key not found in response, or it's not a string containing JSON.")
-              #  thumbnail_info_df = pd.DataFrame([])
-                
-    
-            # thumbnail_info_df = pd.DataFrame.from_dict({key: pd.Series(value) for key, value in thumbnail_response_json.items()})
-            #print('show reversed df here')
-            #print(thumbnail_info_df)
-            #print('show reversed df end')
-            #merged_df = pd.merge(updated_df, thumbnail_info_df, on=['channel_id', 'video_id'])
-            #print('show merged df here')
-            #print(merged_df)
-            #print('show merged df end')
-            # Make db request to store processed data
             store_channel_data_result=store_channel_data(updated_df, collection=db['channel_data'])
             #except Exception as e:
                 #print(f"Error during processing: {e}")
