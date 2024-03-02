@@ -486,4 +486,7 @@ if __name__ == '__main__':
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.DEBUG)
 
-    app.run(threaded=True, port=5000)
+    port = int(os.getenv('PORT', 80))  # Default to 80 if PORT not found
+    app.run(threaded=True, port=port)
+
+    #app.run(threaded=True, port=5000)
