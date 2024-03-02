@@ -31,6 +31,7 @@ db = client['clickwise-db']
 @app.route('/add_channel', methods=['POST'])
 async def add_channel():
     content = request.json
+    print('here')
     channel_url, user_id = content.get('channel_url', ''), content.get('user_id', '')
     channel_url_type = identify_channel_url_type(channel_url)
     channel_id = get_channel_id(channel_url, channel_url_type)
@@ -473,9 +474,6 @@ def get_arima():
         response = {'error': str(e)}
         return response, 400
     
-
-
-
 
 if __name__ == '__main__':
     handler = logging.StreamHandler(sys.stdout)
