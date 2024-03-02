@@ -1,0 +1,12 @@
+Flask[async]>=2.0.1
+pandas
+google-api-python-client
+gunicorn
+numpy
+statsmodels
+scikit-learn
+Flask-CORS
+pymongo
+aiohttp
+gevent==24.2.1
+httpx
