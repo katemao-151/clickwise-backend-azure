@@ -10,3 +10,4 @@ pymongo
 aiohttp
 gevent==24.2.1
 httpx
+certifi

@@ -364,91 +364,7 @@ def get_user_queried_channels():
 
     return jsonify(result)
 
-
-
-
-@app.route('/get_channel_info', methods=['POST'])
-def get_channel_info():
-    content = request.json
-    channel_url = content['channel_url']
-    input_title = content.get('input_title', '')  #in case 
-    user_id = content.get('user_id', '')
-
-    channel_url_type = identify_channel_url_type(channel_url)
-    print('channel_url type is, ', channel_url_type)
-    print(type(channel_url_type))
-    channel_id = get_channel_id(channel_url, channel_url_type) 
-    print('channel_id is, ', channel_id)
-
-    #match = re.search(r"(?<=youtube\.com/)(?:c/|channel/|user/|@)?([^/]+)", channel_url)
-   # if not match:
-    #    raise ValueError("The URL provided doesn't seem to be a valid YouTube channel URL")
-    #channel_id = match.group(1)
-    result = {}
-    try:
-        print(channel_id_exists(channel_id))
-        if channel_id_exists(channel_id):
-            #fetch channel data directly from current db
-            print("found existing channel")
-            updated_df = fetch_channel_data(channel_id)
-            scores, fragment, counts, rows, ngram_dictionary, words = preprocess(updated_df)
-            top_key_words = print_top_keywords(scores, fragment, counts)    #save scores, fragment, counts, all these into db as well?
-            model = download_model_from_firebase(channel_id)
-            expected_features = model.n_features_in_
-            #print('number of expected features is: ', expected_features)
-            #print('len of words are : ', len(words))
-            if expected_features != len(words):
-                model = TrainModel(updated_df, ngram_dictionary, words)
-                upload_model_to_firebase(model, channel_id)
-                update_user_query_history(user_id, channel_id)  #TODO: can streamline this to be one call
-        else:
-            df = get_channel_videos(channel_id)
-            updated_df, problematic_channel  = get_residual(df)
-            store_channel_data(updated_df)
-            
-            scores, fragment, counts, rows, ngram_dictionary, words = preprocess(updated_df)
-            top_key_words = print_top_keywords(scores, fragment, counts)
-            model = TrainModel(updated_df, ngram_dictionary, words)
-            upload_model_to_firebase(model, channel_id)
-            update_user_query_history(user_id, channel_id)
-        if input_title: #if input title is not null, user wants to check out 
-            title_score = evaluate_video_title(input_title, ngram_dictionary, words, model)
-            result['title_score'] = title_score   
-        result['top_key_words'] = top_key_words
-        return jsonify(result)
-    except Exception as e:
-        print('inside this')
-        tb = traceback.format_exc()
-        app.logger.error(tb)
-        response = {'error': str(e)}
-        return response, 400
-
-
-@app.route('/get_user_channel_query_history', methods=['POST'])
-def get_user_channel_query_history():
-    content = request.json
-    user_id = content.get('user_id', '')
-    return fetch_user_history(user_id)
-
-@app.route('/get_channel_model', methods=['POST'])
-def get_channel_model():
-    content = request.json
-    channel_id = content.get('channel_id', '')
-    input_title = content.get('input_title', '')
-    model = download_model_from_firebase(channel_id)
-    result = {}
-    if not isinstance(model, str):
-        if input_title:
-            updated_df = fetch_channel_data(channel_id)
-            scores, fragment, counts, rows, ngram_dictionary, words = preprocess(updated_df)
-            title_score = evaluate_video_title(input_title, ngram_dictionary, words, model)
-            result['title_score'] = title_score 
-        else:
-            result['title_score'] = 1
-    else:
-        result['title_score']= 'model not found'
-    return result
-
+'''
 @app.route('/get_arima', methods=['POST'])
 def get_arima():
     content = request.json
@@ -473,6 +389,7 @@ def get_arima():
         app.logger.error(tb)
         response = {'error': str(e)}
         return response, 400
+'''
     
 
 if __name__ == '__main__':
