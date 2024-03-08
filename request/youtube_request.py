@@ -131,11 +131,16 @@ async def get_channel_videos(channel_id, api_key='AIzaSyBqU1fe2sP7kizG_h3NmsIewH
         base_url = "https://www.googleapis.com/youtube/v3"
         
         # Determine if channel_id is valid and get uploads playlist ID
-        channel_url = f"{base_url}/channels?part=contentDetails,snippet&id={channel_id}&key={api_key}"
+        channel_url = f"{base_url}/channels?part=contentDetails,snippet,statistics&id={channel_id}&key={api_key}"
         if channel_id.startswith('UC') and len(channel_id) == 24:
             channel_response = await fetch_url(session, channel_url)
             if not channel_response.get("items"):
                 raise ValueError("No channel found with the provided identifier")
+            for item in channel_response.get('items', []):
+              subscriber_count= item['statistics']['subscriberCount']
+              channel_name= item['snippet']['title']
+              channel_logo_url= item['snippet']['thumbnails']['default']['url']
+              creation_date= item['snippet']['publishedAt']
         uploads_playlist_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
         # Fetch all video IDs from the playlist (simplified; implement pagination as needed)
         video_ids = await fetch_all_video_ids_from_playlist(session, uploads_playlist_id, api_key)
@@ -153,6 +158,10 @@ async def get_channel_videos(channel_id, api_key='AIzaSyBqU1fe2sP7kizG_h3NmsIewH
                 videos.append({
                     'video_id': item['id'],
                     'channel_id': channel_id,
+                    'subscriber_count' :subscriber_count,
+                    'channel_name': channel_name,
+                    'channel_logo_url': channel_logo_url,
+                    'creation_date': creation_date,
                     'title': item['snippet']['title'],
                     'video_thumbnail': item['snippet']['thumbnails']['default']['url'],
                     'video_length': item['contentDetails']['duration'],
